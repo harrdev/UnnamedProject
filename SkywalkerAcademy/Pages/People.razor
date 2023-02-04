@@ -11,23 +11,26 @@
 }
 else
 {
+    <p>@allPeopleObj.next</p>
     <ul>
-        @*@foreach (var person in peopleList)
+        @foreach (var person in allPeopleList)
         {
-            <li>@person.Name</li>
-        }*@
+           <li>@person.name</li>
+        }
     </ul>
 }
 @code {
-    private IEnumerable<PeopleList> peopleList = Array.Empty<PeopleList>();
+    private PeopleObj allPeopleObj = new PeopleObj();
+    private List<Person> allPeopleList = new List<Person>();
     private bool getPeopleError;
     private bool shouldRender;
+    int pageNum = 1;
 
     protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://swapi.dev/api/people/");
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://swapi.dev/api/people/?page=" + pageNum.ToString());
 
         var client = ClientFactory.CreateClient();
 
@@ -36,7 +39,10 @@ else
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            peopleList = await JsonSerializer.DeserializeAsync<IEnumerable<PeopleList>>(responseStream);
+            //peopleArray = await JsonSerializer.DeserializeAsync<IEnumerable<SwPerson>>(responseStream);
+            allPeopleObj = await JsonSerializer.DeserializeAsync<PeopleObj>(responseStream);
+            allPeopleList = allPeopleObj.results;
+            
         }
         else
         {
@@ -45,10 +51,33 @@ else
         shouldRender = true;
     }
 
-    public class PeopleList
+
+    public class Person
     {
-        [JsonPropertyName("results")]
-        public List<object> Results { get; set; }
+        public string name { get; set; }
+        public string height { get; set; }
+        public string mass { get; set; }
+        public string hair_color { get; set; }
+        public string skin_color { get; set; }
+        public string eye_color { get; set; }
+        public string birth_year { get; set; }
+        public string gender { get; set; }
+        public string homeworld { get; set; }
+        public List<string> films { get; set; }
+        public List<string> species { get; set; }
+        public List<string> vehicles { get; set; }
+        public List<string> starships { get; set; }
+        public DateTime created { get; set; }
+        public DateTime edited { get; set; }
+        public string url { get; set; }
+    }
+
+    public class PeopleObj
+    {
+        public int count { get; set; }
+        public string next { get; set; }
+        public object previous { get; set; }
+        public List<Person> results { get; set; }
     }
 
 }
