@@ -12,6 +12,16 @@
 else
 {
     <p>@allPeopleObj.next</p>
+    @if (allPeopleObj.next != null)
+    {
+        pageNum++;
+        <button @onclick="OnInitializedAsync">NEXT PAGE</button>
+    }
+    @if (allPeopleObj.previous != null)
+    {
+        pageNum--;
+        <button @onclick="OnInitializedAsync">PREV PAGE</button>
+    }
     <ul>
         @foreach (var person in allPeopleList)
         {
