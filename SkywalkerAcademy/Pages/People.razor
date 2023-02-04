@@ -1,0 +1,54 @@
+﻿@page "/people"
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IHttpClientFactory ClientFactory
+
+<h3>People</h3>
+
+@if (getPeopleError)
+{
+    <p>Unable to fetch people</p>
+}
+else
+{
+    <ul>
+        @*@foreach (var person in peopleList)
+        {
+            <li>@person.Name</li>
+        }*@
+    </ul>
+}
+@code {
+    private IEnumerable<PeopleList> peopleList = Array.Empty<PeopleList>();
+    private bool getPeopleError;
+    private bool shouldRender;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://swapi.dev/api/people/");
+
+        var client = ClientFactory.CreateClient();
+
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            peopleList = await JsonSerializer.DeserializeAsync<IEnumerable<PeopleList>>(responseStream);
+        }
+        else
+        {
+            getPeopleError = true;
+        }
+        shouldRender = true;
+    }
+
+    public class PeopleList
+    {
+        [JsonPropertyName("results")]
+        public List<object> Results { get; set; }
+    }
+
+}
