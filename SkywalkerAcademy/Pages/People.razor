@@ -11,21 +11,14 @@
 }
 else
 {
-    <p>@allPeopleObj.next</p>
     @if (allPeopleObj.next != null)
     {
-        pageNum++;
-        <button @onclick="OnInitializedAsync">NEXT PAGE</button>
-    }
-    @if (allPeopleObj.previous != null)
-    {
-        pageNum--;
-        <button @onclick="OnInitializedAsync">PREV PAGE</button>
+        <button @onclick="LoadMore">LOAD MORE</button>
     }
     <ul>
         @foreach (var person in allPeopleList)
         {
-           <li>@person.name</li>
+           <li><a href="/person/{@person.name}">@person.name</a></li>
         }
     </ul>
 }
@@ -34,6 +27,7 @@ else
     private List<Person> allPeopleList = new List<Person>();
     private bool getPeopleError;
     private bool shouldRender;
+    private bool isAnotherPage = true;
     int pageNum = 1;
 
     protected override bool ShouldRender() => shouldRender;
@@ -51,8 +45,12 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             //peopleArray = await JsonSerializer.DeserializeAsync<IEnumerable<SwPerson>>(responseStream);
             allPeopleObj = await JsonSerializer.DeserializeAsync<PeopleObj>(responseStream);
-            allPeopleList = allPeopleObj.results;
-            
+            //allPeopleList = allPeopleObj.results;
+            foreach (Person p in allPeopleObj.results)
+            {
+                allPeopleList.Add(p);
+            }
+
         }
         else
         {
@@ -61,6 +59,11 @@ else
         shouldRender = true;
     }
 
+    private void LoadMore()
+    {
+        pageNum++;
+        OnInitializedAsync();
+    }
 
     public class Person
     {
