@@ -1,8 +1,9 @@
-﻿@page "/person/{person.name}"
+﻿@page "/person/{name}"
 
-<h3>Person</h3>
-
-
+<h3>@Name</h3>
 
 @code {
+    // Need to figure out how to pass the object istelf
+    [Parameter]
+    public string Name { get; set; }
 }
